@@ -1,24 +1,33 @@
+
 import sys
 import time
 import psutil
 import os
 import re
 from core.rule_based import optimize_rule_based, read_fillers
-from core.extractive import optimize_extractive
+from core.smart_reduction import optimize_smart_reduction
 from utils.co2_estimator import token_count, tokens_to_wh, per_wh
 from core.validator import validate_compression
+from utils.pricing import (
+    get_model_list, 
+    get_model_by_index, 
+    calculate_cost_savings, 
+    format_cost_display,
+    get_all_model_ids,
+    MODEL_CATEGORIES
+)
 
 
-def run(prompt: str):
+def run(prompt: str, model_id: str = None):
     original = prompt.strip()
     if not original:
         print('No prompt provided.')
         return
 
     try:
-        patterns, words = read_fillers('config/fillers.json')
+        patterns, words, redundant_phrases, replacements, stopwords = read_fillers('config/fillers.json')
     except Exception:
-        print('Missing or invalid config/fillers.json. Create config/fillers.json with {"patterns": [...], "words": [...]}')
+        print('Missing or invalid config/fillers.json. Create config/fillers.json with patterns, words, redundant_phrases, verbose_replacements, and stopwords.')
         return
 
     # Start tracking compression energy
@@ -26,8 +35,16 @@ def run(prompt: str):
     compression_start_time = time.time()
     compression_start_cpu = process.cpu_percent(interval=0.1)
 
-    # Step 1: rule-based stripping using provided fillers
-    cleaned = optimize_rule_based(original, patterns=patterns, words=words)
+    # Step 1: Enhanced rule-based compression
+    cleaned = optimize_rule_based(
+        original, 
+        patterns=patterns, 
+        words=words,
+        redundant_phrases=redundant_phrases,
+        verbose_replacements=replacements,
+        stopwords=stopwords,
+        remove_stopwords=False  # Can be made configurable
+    )
 
     def tidy_text(s: str) -> str:
         if not s:
@@ -55,15 +72,15 @@ def run(prompt: str):
 
     cleaned = tidy_text(cleaned)
 
-    # Step 2: extractive summarization on cleaned prompt
-    orig_tokens = token_count(original)
-    num_sentences = 2 if orig_tokens >= 60 else 1
-    compressed = optimize_extractive(cleaned, max_sentences=num_sentences)
+    # Step 2: Smart reduction using TF-IDF
+    compressed = optimize_smart_reduction(cleaned, target_reduction=0.20, preserve_question_structure=True)
     compressed = tidy_text(compressed)
-
-    cleaned_tokens = token_count(cleaned)
+    
+    orig_tokens = token_count(original)
     compressed_tokens = token_count(compressed)
-    if compressed_tokens >= cleaned_tokens:
+    
+    # Fallback: if compression ratio is low, try aggressive patterns
+    if compressed_tokens >= orig_tokens * 0.95:  # Less than 5% compression
         aggressive_patterns = []
         try:
             import json
@@ -133,8 +150,9 @@ def run(prompt: str):
 
     print('\nCAPO Metrics:')
     print(f'Original tokens: {orig_tokens}')
-    print(f'After rule-based (step1) tokens: {cleaned_tokens}')
-    print(f'After extractive (step2) tokens: {compressed_tokens}')
+    print(f'After 2-layer compression: {compressed_tokens}')
+    print(f'  Layer 1 (rule-based): Pattern matching & phrase replacement')
+    print(f'  Layer 2 (smart reduction): TF-IDF word importance')
     print(f'Tokens saved: {tokens_saved}')
     print(f'Compression ratio: {(1 - compressed_tokens/orig_tokens)*100:.1f}%' if orig_tokens > 0 else 'N/A')
     print(f'Compression time: {compression_time_sec:.3f} seconds')
@@ -155,6 +173,14 @@ def run(prompt: str):
     print(f'  Compression CO2 cost: {compression_co2_cost:.8f} g')
     print(f'  NET CO2 saved:        {net_co2_saved:.8f} g')
 
+    # Calculate and display cost savings if model was provided
+    if model_id:
+        try:
+            cost_info = calculate_cost_savings(tokens_saved, model_id)
+            print(format_cost_display(cost_info))
+        except ValueError as e:
+            print(f'\nCost calculation error: {e}')
+
     print('\nCompressed Prompt:')
     print(compressed)
     
@@ -165,15 +191,73 @@ def run(prompt: str):
 
 def _read_prompt_from_stdin_or_input() -> str:
     if not sys.stdin.isatty():
+        # When piped, the rest of stdin after model selection is the prompt
         data = sys.stdin.read()
         if data.strip():
             return data
     try:
-        return input('Enter your prompt (finish with Enter):\n')
-    except EOFError:
+        print('Enter your prompt (paste all at once, then press Ctrl+D or Ctrl+Z on Windows):\n')
+        lines = []
+        while True:
+            try:
+                line = input()
+                lines.append(line)
+            except EOFError:
+                break
+        return '\n'.join(lines)
+    except KeyboardInterrupt:
         return ''
 
 
+def _select_model() -> str:
+    """Prompt user to select an LLM model for cost calculation."""
+    print("\n" + "="*60)
+    print("SELECT YOUR LLM MODEL")
+    print("="*60)
+    print(get_model_list())
+    print("\nEnter the number of your model (or press Enter to skip cost calculation):")
+    
+    try:
+        # Read from stdin if available, otherwise from terminal
+        if not sys.stdin.isatty():
+            # When piped, read from stdin
+            choice = sys.stdin.readline().strip()
+        else:
+            # Interactive mode, read from terminal
+            choice = input("> ").strip()
+        
+        if not choice:
+            return None
+        
+        # Try to parse as number first
+        try:
+            index = int(choice)
+            model_id = get_model_by_index(index)
+            if model_id:
+                return model_id
+        except ValueError:
+            # If not a number, try fuzzy matching with model names
+            choice_lower = choice.lower()
+            
+            # Build list of all models with their display names
+            for category, model_list in MODEL_CATEGORIES.items():
+                for model_id, display_name in model_list:
+                    # Check if user input matches model_id or display_name
+                    if (choice_lower in model_id.lower() or 
+                        choice_lower in display_name.lower() or
+                        choice.replace(' ', '-').lower() in model_id.lower()):
+                        print(f"✓ Selected: {display_name}")
+                        return model_id
+        
+        print(f"Invalid selection '{choice}'. Skipping cost calculation.")
+        return None
+        
+    except (FileNotFoundError, EOFError):
+        print("Invalid input or no terminal available. Skipping cost calculation.")
+        return None
+
+
 if __name__ == '__main__':
+    model_id = _select_model()
     prompt = _read_prompt_from_stdin_or_input()
-    run(prompt)
+    run(prompt, model_id)

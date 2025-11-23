@@ -63,6 +63,45 @@
     "\\bso[,\\s]\\b(?!\\s+(that|many|much|far))",
     "\\byou know\\b"
   ],
+  "redundant_phrases": [
+    "\\bin order to\\b",
+    "\\bthe fact that\\b",
+    "\\bit is important to note that\\b",
+    "\\bit should be noted that\\b",
+    "\\bas a matter of fact\\b",
+    "\\bfor the purpose of\\b",
+    "\\bdue to the fact that\\b",
+    "\\bin the event that\\b",
+    "\\bat this point in time\\b",
+    "\\bat the present time\\b",
+    "\\bfor all intents and purposes\\b",
+    "\\bfor the most part\\b",
+    "\\bin a timely manner\\b",
+    "\\bin the near future\\b",
+    "\\bat the end of the day\\b",
+    "\\bto all intents and purposes\\b"
+  ],
+  "verbose_replacements": {
+    "in order to": "to",
+    "due to the fact that": "because",
+    "in the event that": "if",
+    "at this point in time": "now",
+    "at the present time": "now",
+    "in a timely manner": "soon",
+    "in the near future": "soon",
+    "for the purpose of": "to",
+    "with regard to": "about",
+    "with reference to": "about",
+    "in relation to": "about",
+    "concerning the matter of": "about",
+    "as a consequence of": "because",
+    "on account of": "because"
+  },
+  "stopwords": [
+    "\\ba\\b(?!\\s+(lot|few|bit|while|number|variety|range|series))",
+    "\\ban\\b(?!\\s+(important|urgent|essential|example|instance))",
+    "\\bthe\\b(?!\\s+(main|key|only|best|most|first|last))"
+  ],
   "aggressive": [
     ",\\s*please\\b.*$",
     "\\bplease\\b.*$",

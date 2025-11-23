@@ -20,7 +20,7 @@ export ELECTRICITY_MAPS_API_KEY='your-key'
 ## Usage
 
 ```bash
-cd backend
+cd prompt_compressor
 python main.py
 ```
 
@@ -38,7 +38,7 @@ Edit `backend/config/fillers.json` to customize patterns.
 ## Structure
 
 ```
-backend/
+prompt_compressor/
 ├── main.py
 ├── config/fillers.json
 ├── core/

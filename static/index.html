@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Green AI — Carbon-Aware Conversations</title>
+    <title>C4 — Compress.  Context.  Cut.  Costs</title>
     <style>
       :root{
         --eco-green: #10b981;
@@ -455,6 +455,17 @@
               ✍️ Smart Prompting — Feature #1
             </div>
             <label class="muted" style="display: block; margin-bottom: 8px;">Enter your prompt below and watch the carbon impact change</label>
+            
+            <!-- Model Selection Dropdown -->
+            <div style="margin-bottom: 12px;">
+              <label for="modelSelect" style="display: block; font-weight: 600; color: var(--eco-dark); margin-bottom: 6px;">
+                💰 Select LLM Model (for cost calculation)
+              </label>
+              <select id="modelSelect" style="width: 100%; padding: 10px; border: 1px solid rgba(16,185,129,0.3); border-radius: 8px; background: white; color: var(--eco-dark); font-size: 14px; cursor: pointer;">
+                <option value="">-- Skip cost calculation --</option>
+              </select>
+            </div>
+            
             <textarea id="prompt" placeholder="Paste your AI prompt here...
 
 Try something verbose like:
@@ -568,6 +579,44 @@ Try something verbose like:
       const ENERGY_PER_TOKEN_WH = 0.0024; // 0.24 Wh / 100 tokens
       const CO2_PER_TOKEN_G = 0.0003;     // 0.03 gCO2e / 100 tokens
       const WATER_PER_TOKEN_ML = 0.0026;  // 0.26 mL / 100 tokens
+
+      // Load available models on page load
+      async function loadModels() {
+        try {
+          const resp = await fetch('/models');
+          const data = await resp.json();
+          const select = document.getElementById('modelSelect');
+          
+          let currentCategory = '';
+          data.models.forEach(model => {
+            if (model.category !== currentCategory) {
+              if (currentCategory) {
+                // Add separator between categories
+                const separator = document.createElement('option');
+                separator.disabled = true;
+                separator.textContent = '──────────';
+                select.appendChild(separator);
+              }
+              currentCategory = model.category;
+              const categoryHeader = document.createElement('option');
+              categoryHeader.disabled = true;
+              categoryHeader.textContent = `${model.category}:`;
+              categoryHeader.style.fontWeight = 'bold';
+              select.appendChild(categoryHeader);
+            }
+            
+            const option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = `  ${model.name} - $${model.price_per_1m.toFixed(2)}/1M tokens`;
+            select.appendChild(option);
+          });
+        } catch (error) {
+          console.error('Failed to load models:', error);
+        }
+      }
+      
+      // Load models when page loads
+      window.addEventListener('DOMContentLoaded', loadModels);
 
       // Escape HTML
       const escape = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
@@ -769,6 +818,7 @@ Try something verbose like:
         const light_stemming = document.getElementById('light_stemming').checked;
         const super_aggressive = document.getElementById('super_aggressive').checked;
         const encode = document.getElementById('encode').checked;
+        const model_id = document.getElementById('modelSelect').value || null;
         
         const resp = await fetch('/compress',{
           method:'POST',
@@ -781,7 +831,8 @@ Try something verbose like:
             remove_punctuation, 
             light_stemming, 
             super_aggressive,
-            encode
+            encode,
+            model_id
           })
         });
         const data = await resp.json();
@@ -794,7 +845,14 @@ Try something verbose like:
         
         const meta = data.meta || {};
         const opts = meta.opts || {};
-        const details = `Compression applied • Fillers removed: ${meta.removed_fillers || 0} • Stopwords: ${meta.removed_stopwords || 0} • Punctuation: ${meta.removed_punctuation_tokens || 0} • Stems: ${meta.removed_light_stems || 0}`;
+        let details = `Compression applied • Fillers removed: ${meta.removed_fillers || 0} • Stopwords: ${meta.removed_stopwords || 0} • Punctuation: ${meta.removed_punctuation_tokens || 0} • Stems: ${meta.removed_light_stems || 0}`;
+        
+        // Add cost savings if available
+        if (data.cost_savings) {
+          const cost = data.cost_savings;
+          details += ` • 💰 Cost saved: $${cost.cost_saved_usd.toFixed(6)} (${cost.model})`;
+        }
+        
         document.getElementById('stats').textContent = details;
         
         document.getElementById('origTokens').textContent = data.original_tokens;
@@ -818,7 +876,9 @@ Try something verbose like:
           compressed_tokens: Number(data.compressed_tokens) || 0,
           tokens_saved: Number(data.tokens_saved) || 0,
           compressed_prompt: data.compressed_prompt || '',
-          carbon_saved: (added * CO2_PER_TOKEN_G).toFixed(3)
+          carbon_saved: (added * CO2_PER_TOKEN_G).toFixed(3),
+          cost_saved: data.cost_savings ? data.cost_savings.cost_saved_usd.toFixed(6) : null,
+          model: data.cost_savings ? data.cost_savings.model : null
         };
         addHistoryEntry(entry);
 
@@ -865,7 +925,8 @@ Try something verbose like:
           row.onmouseleave = () => row.style.background = 'transparent';
           row.title = (new Date(e.ts)).toLocaleString();
           const carbonInfo = e.carbon_saved ? ` • ${e.carbon_saved}g CO₂ saved` : '';
-          row.innerHTML = `<div style="display:flex;justify-content:space-between;gap:12px; margin-bottom: 6px;"><div style="font-size:12px; color: var(--text-muted);">${new Date(e.ts).toLocaleString()}</div><div style="font-weight:800; color:var(--eco-green);">+${e.tokens_saved} tokens</div></div><div style="font-size:12px; color:var(--text-muted);">Orig ${e.original_tokens} → Comp ${e.compressed_tokens}${carbonInfo}</div>`;
+          const costInfo = e.cost_saved ? ` • $${e.cost_saved} saved (${e.model})` : '';
+          row.innerHTML = `<div style="display:flex;justify-content:space-between;gap:12px; margin-bottom: 6px;"><div style="font-size:12px; color: var(--text-muted);">${new Date(e.ts).toLocaleString()}</div><div style="font-weight:800; color:var(--eco-green);">+${e.tokens_saved} tokens</div></div><div style="font-size:12px; color:var(--text-muted);">Orig ${e.original_tokens} → Comp ${e.compressed_tokens}${carbonInfo}${costInfo}</div>`;
           row.onclick = ()=>{
             document.getElementById('result').innerText = e.compressed_prompt;
             document.getElementById('origTokens').textContent = e.original_tokens;

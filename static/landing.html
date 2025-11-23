@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>SmartPrompt — AI Prompt Compression</title>
+  <title>C4 — Compress. Context. Cut. Costs</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -51,13 +51,13 @@
     .orb-2 { width: 500px; height: 500px; background: var(--cyan); bottom: -250px; right: -250px; }
 
     nav {
-      position: fixed;
-      top: 0;
+      position: relative;
       width: 100%;
       z-index: 100;
       background: rgba(0,0,0,0.7);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid rgba(168,85,247,0.2);
+      padding: 30px 0;
     }
 
     .nav-container {
@@ -67,14 +67,29 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: relative;
     }
 
     .logo {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 22px;
+      font-size: 48px;
       font-weight: 700;
       color: var(--text);
       text-decoration: none;
+      display: flex;
+      align-items: center;
+      position: absolute;
+      left: 40px;
+    }
+    
+    .nav-center {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 35px;
+      font-weight: 500;
+      color: var(--text);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
     .nav-link {
@@ -82,6 +97,8 @@
       text-decoration: none;
       font-size: 15px;
       transition: color 0.3s;
+      position: absolute;
+      right: 40px;
     }
 
     .nav-link:hover { color: var(--text); }
@@ -534,8 +551,11 @@
 
   <nav>
     <div class="nav-container">
-      <a href="#" class="logo">SmartPrompt</a>
-      <a href="https://github.com" class="nav-link" target="_blank">GitHub</a>
+      <a href="#" class="logo">
+        <span style="font-weight: 700; font-size: 48px; color: var(--purple);">C4</span>
+      </a>
+      <div class="nav-center">Compress.  Context.  Cut.  Costs</div>
+      <a href="https://github.com/pallavisharma6802/GreenTok" class="nav-link" target="_blank">GitHub</a>
     </div>
   </nav>
 
@@ -565,21 +585,11 @@
       </div>
 
       <div class="controls">
-        <div class="control">
-          <input type="checkbox" id="aggressive">
-          <label for="aggressive">Aggressive</label>
-        </div>
-        <div class="control">
-          <input type="checkbox" id="stopwords">
-          <label for="stopwords">Remove Stopwords</label>
-        </div>
-        <div class="control">
-          <input type="checkbox" id="encode">
-          <label for="encode">Phrase Encoding</label>
-        </div>
-        <div class="control">
-          <input type="checkbox" id="tiktoken">
-          <label for="tiktoken">TikToken</label>
+        <div class="control" style="flex: 2;">
+          <label for="modelSelect" style="font-weight: 600; margin-bottom: 4px; display: block;">💰 Select LLM Model (for cost calculation)</label>
+          <select id="modelSelect" style="width: 100%; padding: 10px; border: 1px solid rgba(168,85,247,0.3); border-radius: 8px; background: rgba(26,26,26,0.6); color: var(--text); font-size: 14px; cursor: pointer;">
+            <option value="" disabled selected>Choose Model</option>
+          </select>
         </div>
       </div>
 
@@ -641,7 +651,7 @@
         <p class="study-content">
           A B2B SaaS company with 50K monthly active users was processing 2 million AI prompts per month through GPT-4. 
           Their average prompt length was 280 tokens, costing $0.0084 per prompt ($16,800/month total). 
-          After implementing SmartPrompt compression, their average dropped to 154 tokens - a 45% reduction. 
+          After implementing C4 compression, their average dropped to 154 tokens - a 45% reduction. 
           Monthly costs fell to $9,240, saving $7,560 per month ($90,720 annually).
         </p>
         <div class="study-results">
@@ -739,7 +749,7 @@
       <a href="#">Documentation</a>
       <a href="#">API</a>
     </div>
-    <p style="margin-top: 16px;">2025 SmartPrompt</p>
+    <p style="margin-top: 16px;">2025 C4 — Compress.  Context.  Cut.  Costs</p>
   </footer>
 
   <script>
@@ -750,10 +760,41 @@
     const btn = document.getElementById('compress');
     const metrics = document.getElementById('metrics');
 
+    // Load available models on page load
+    async function loadModels() {
+      try {
+        const resp = await fetch('/models');
+        const data = await resp.json();
+        const select = document.getElementById('modelSelect');
+        
+        let currentCategory = '';
+        data.models.forEach(model => {
+          if (model.category !== currentCategory) {
+            currentCategory = model.category;
+            const categoryHeader = document.createElement('option');
+            categoryHeader.disabled = true;
+            categoryHeader.textContent = `${model.category}:`;
+            categoryHeader.style.fontWeight = 'bold';
+            select.appendChild(categoryHeader);
+          }
+          
+          const option = document.createElement('option');
+          option.value = model.id;
+          option.textContent = `  ${model.name} - $${model.price_per_1m.toFixed(2)}/1M tokens`;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Failed to load models:', error);
+      }
+    }
+    
+    // Load models when page loads
+    window.addEventListener('DOMContentLoaded', loadModels);
+
     // Persistent tracking with localStorage
-    let totalCostSaved = parseFloat(localStorage.getItem('sp_total_cost') || '0');
-    let totalTokensSaved = parseInt(localStorage.getItem('sp_total_tokens') || '0');
-    let totalCarbonSaved = parseFloat(localStorage.getItem('sp_total_carbon') || '0');
+    let totalCostSaved = parseFloat(localStorage.getItem('sp_total_cost') || '0') || 0;
+    let totalTokensSaved = parseInt(localStorage.getItem('sp_total_tokens') || '0') || 0;
+    let totalCarbonSaved = parseFloat(localStorage.getItem('sp_total_carbon') || '0') || 0;
 
     // Goals
     const GOALS = {
@@ -763,10 +804,15 @@
     };
 
     function updateTrackers() {
-      // Update display values
-      document.getElementById('total-cost-saved').textContent = `$${totalCostSaved.toFixed(2)}`;
+      // Ensure values are valid numbers
+      totalCostSaved = isNaN(totalCostSaved) ? 0 : totalCostSaved;
+      totalTokensSaved = isNaN(totalTokensSaved) ? 0 : totalTokensSaved;
+      totalCarbonSaved = isNaN(totalCarbonSaved) ? 0 : totalCarbonSaved;
+
+      // Update display values - show meaningful precision for small values
+      document.getElementById('total-cost-saved').textContent = `$${totalCostSaved.toFixed(3)}`;
       document.getElementById('total-tokens-saved').textContent = totalTokensSaved.toLocaleString();
-      document.getElementById('total-carbon-saved').textContent = `${totalCarbonSaved.toFixed(2)}g`;
+      document.getElementById('total-carbon-saved').textContent = `${totalCarbonSaved.toFixed(3)}g`;
 
       // Calculate percentages
       const costPercent = Math.min((totalCostSaved / GOALS.cost) * 100, 100);
@@ -817,27 +863,39 @@
       btn.textContent = 'Compressing...';
 
       try {
+        const model_id = document.getElementById('modelSelect').value || null;
+        
         const res = await fetch('/compress', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             prompt,
-            aggressive: document.getElementById('aggressive').checked,
-            remove_stopwords: document.getElementById('stopwords').checked,
-            encode: document.getElementById('encode').checked,
-            use_tiktoken: document.getElementById('tiktoken').checked
+            model_id
           })
         });
 
         const data = await res.json();
         
         comp.value = data.compressed_prompt;
+        
+        // Fix: Use correct token counts from backend
+        origCount.textContent = `${data.original_tokens} tokens`;
         compCount.textContent = `${data.compressed_tokens} tokens`;
 
         const saved = data.tokens_saved;
-        const cost = (saved * 0.00003).toFixed(4);
-        const percent = ((saved / data.original_tokens) * 100).toFixed(1);
-        const carbon = (saved * 0.0003).toFixed(2);
+        const percent = data.original_tokens > 0 ? ((saved / data.original_tokens) * 100).toFixed(1) : 0;
+        
+        // Use actual CO2 from backend if available, otherwise estimate
+        let carbon = (saved * 0.0003).toFixed(3);
+        if (data.co2_saved_g !== undefined) {
+          carbon = data.co2_saved_g.toFixed(3);
+        }
+        
+        // Use actual cost from backend if available, otherwise estimate
+        let cost = (saved * 0.00003).toFixed(3);
+        if (data.cost_savings) {
+          cost = data.cost_savings.cost_saved_usd.toFixed(3);
+        }
 
         document.getElementById('saved').textContent = saved;
         document.getElementById('cost').textContent = `$${cost}`;

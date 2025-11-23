@@ -1,13 +1,11 @@
-<<<<<<< HEAD
 fastapi
 uvicorn
 pydantic
 pytest
 # Optional but recommended for accurate token counts
 tiktoken
-=======
+
 sentence-transformers>=2.2.2
 tiktoken>=0.4.0
 requests>=2.31.0
 psutil>=5.9.0
->>>>>>> ba129abcd812c1ae036c23ca4b6fdc1f05c11ec7

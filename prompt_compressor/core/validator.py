@@ -6,7 +6,18 @@ Uses cosine similarity to compare original and compressed text.
 """
 
 from typing import Tuple
-from core.extractive import get_model
+from sentence_transformers import SentenceTransformer
+import numpy as np
+
+# Load model once at module level
+_model = None
+
+def get_model():
+    """Get or initialize the sentence transformer model."""
+    global _model
+    if _model is None:
+        _model = SentenceTransformer('all-MiniLM-L6-v2')
+    return _model
 
 
 def calculate_semantic_similarity(text1: str, text2: str) -> float:
