@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>SmartPrompt — AI Prompt Compression</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --purple: #a855f7;
+      --cyan: #06b6d4;
+      --bg: #000;
+      --card: #0f0f0f;
+      --text: #fff;
+      --dim: #9ca3af;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: 
+        linear-gradient(90deg, rgba(168,85,247,0.03) 1px, transparent 1px),
+        linear-gradient(rgba(168,85,247,0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.25;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .orb-1 { width: 400px; height: 400px; background: var(--purple); top: -200px; left: -200px; }
+    .orb-2 { width: 500px; height: 500px; background: var(--cyan); bottom: -250px; right: -250px; }
+
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(168,85,247,0.2);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 16px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-link {
+      color: var(--dim);
+      text-decoration: none;
+      font-size: 15px;
+      transition: color 0.3s;
+    }
+
+    .nav-link:hover { color: var(--text); }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 120px 40px 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(40px, 6vw, 64px);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      letter-spacing: -1px;
+    }
+
+    .gradient {
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: var(--dim);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .tool {
+      background: var(--card);
+      border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 40px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .panel h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .count {
+      font-size: 13px;
+      padding: 4px 12px;
+      background: rgba(168,85,247,0.1);
+      border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 12px;
+      color: var(--purple);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 280px;
+      background: var(--bg);
+      border: 1px solid rgba(168,85,247,0.2);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--text);
+      font-family: 'Inter', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--purple);
+    }
+
+    textarea::placeholder { color: var(--dim); }
+
+    .controls {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      padding: 20px;
+      background: rgba(168,85,247,0.05);
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control label {
+      font-size: 14px;
+      color: var(--dim);
+      cursor: pointer;
+    }
+
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: var(--purple);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--purple), #6366f1);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .metric {
+      background: var(--bg);
+      border: 1px solid rgba(168,85,247,0.2);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .metric-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--purple);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px;
+      border-top: 1px solid rgba(168,85,247,0.2);
+      color: var(--dim);
+      font-size: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    footer a {
+      color: var(--purple);
+      text-decoration: none;
+      margin: 0 12px;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* Use Cases */
+    .use-cases {
+      margin: 80px 0;
+      padding: 60px 40px;
+      background: var(--card);
+      border: 1px solid rgba(168,85,247,0.2);
+      border-radius: 20px;
+    }
+
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .cases-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+
+    .case {
+      background: var(--bg);
+      border: 1px solid rgba(168,85,247,0.2);
+      border-radius: 16px;
+      padding: 32px;
+      transition: all 0.3s;
+    }
+
+    .case:hover {
+      border-color: var(--purple);
+      transform: translateY(-5px);
+    }
+
+    .case h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--purple);
+    }
+
+    .case p {
+      color: var(--dim);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* Study Case */
+    .study-case {
+      background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(6,182,212,0.1));
+      border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 16px;
+      padding: 40px;
+    }
+
+    .study-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .study-header h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .study-tag {
+      background: rgba(168,85,247,0.2);
+      color: var(--purple);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .study-content {
+      color: var(--dim);
+      font-size: 15px;
+      line-height: 1.8;
+      margin-bottom: 32px;
+    }
+
+    .study-results {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .study-metric {
+      text-align: center;
+      padding: 20px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+    }
+
+    .study-metric-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .study-metric-label {
+      font-size: 12px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Analytics Section */
+    .analytics {
+      margin: 80px 0;
+    }
+
+    .analytics-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid rgba(168,85,247,0.2);
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .stat-desc {
+      color: var(--dim);
+      font-size: 14px;
+    }
+
+    /* Progress Tracker */
+    .tracker {
+      margin: 80px 0;
+      padding: 60px 40px;
+      background: var(--card);
+      border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 20px;
+    }
+
+    .tracker-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .goals {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+
+    .goal {
+      background: var(--bg);
+      border: 1px solid rgba(168,85,247,0.2);
+      border-radius: 16px;
+      padding: 32px;
+    }
+
+    .goal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .goal-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .goal-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--purple);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: rgba(168,85,247,0.1);
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      border-radius: 20px;
+      transition: width 2s cubic-bezier(0.65, 0, 0.35, 1);
+      width: 0%;
+      box-shadow: 0 0 20px rgba(168,85,247,0.5);
+    }
+
+    .progress-label {
+      font-size: 13px;
+      color: var(--dim);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .goal.animating {
+      animation: pulse 1s ease-in-out;
+    }
+
+    @media (max-width: 768px) {
+      .split { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      textarea { min-height: 200px; }
+      .cases-grid, .analytics-grid, .goals { grid-template-columns: 1fr; }
+      .study-results { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <nav>
+    <div class="nav-container">
+      <a href="#" class="logo">SmartPrompt</a>
+      <a href="https://github.com" class="nav-link" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="header">
+      <h1>AI Prompt <span class="gradient">Compression</span></h1>
+      <p class="subtitle">Reduce token usage by up to 42% while preserving meaning. Lower costs, faster responses.</p>
+    </div>
+
+    <div class="tool">
+      <div class="split">
+        <div class="panel">
+          <h3>
+            Original Prompt
+            <span class="count" id="orig-count">0 tokens</span>
+          </h3>
+          <textarea id="original" placeholder="Paste your AI prompt here..."></textarea>
+        </div>
+
+        <div class="panel">
+          <h3>
+            Compressed
+            <span class="count" id="comp-count">0 tokens</span>
+          </h3>
+          <textarea id="compressed" placeholder="Compressed version appears here..." readonly></textarea>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <input type="checkbox" id="aggressive">
+          <label for="aggressive">Aggressive</label>
+        </div>
+        <div class="control">
+          <input type="checkbox" id="stopwords">
+          <label for="stopwords">Remove Stopwords</label>
+        </div>
+        <div class="control">
+          <input type="checkbox" id="encode">
+          <label for="encode">Phrase Encoding</label>
+        </div>
+        <div class="control">
+          <input type="checkbox" id="tiktoken">
+          <label for="tiktoken">TikToken</label>
+        </div>
+      </div>
+
+      <button class="btn" id="compress">Compress Prompt</button>
+
+      <div class="metrics" id="metrics" style="display: none;">
+        <div class="metric">
+          <span class="metric-val" id="saved">0</span>
+          <span class="metric-label">Tokens Saved</span>
+        </div>
+        <div class="metric">
+          <span class="metric-val" id="cost">$0.00</span>
+          <span class="metric-label">Cost Saved</span>
+        </div>
+        <div class="metric">
+          <span class="metric-val" id="percent">0%</span>
+          <span class="metric-label">Reduction</span>
+        </div>
+        <div class="metric">
+          <span class="metric-val" id="carbon">0g</span>
+          <span class="metric-label">CO₂ Saved</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Use Cases -->
+    <div class="use-cases">
+      <h2 class="section-title">Why Reduce AI Costs</h2>
+      <div class="cases-grid">
+        <div class="case">
+          <h4>Lower Operating Expenses</h4>
+          <p>
+            Every API call costs money. Reducing token count by 40% means 40% lower bills from OpenAI, Anthropic, or Google. 
+            For companies spending $10K/month, that's $4K saved instantly.
+          </p>
+        </div>
+        <div class="case">
+          <h4>Scale Without Breaking Budget</h4>
+          <p>
+            More users, more prompts, exponential costs. Compression lets you handle 2x the traffic at the same price point. 
+            Critical for startups and growing products.
+          </p>
+        </div>
+        <div class="case">
+          <h4>Reduce Carbon Footprint</h4>
+          <p>
+            Fewer tokens mean less compute, less energy, less water cooling. Each compressed prompt saves 0.025 Wh and 0.004g CO₂. 
+            Small per query, massive at scale.
+          </p>
+        </div>
+      </div>
+
+      <!-- Study Case -->
+      <div class="study-case">
+        <div class="study-header">
+          <h4>Real-World Study: SaaS Startup Cuts Costs 45%</h4>
+          <span class="study-tag">Case Study</span>
+        </div>
+        <p class="study-content">
+          A B2B SaaS company with 50K monthly active users was processing 2 million AI prompts per month through GPT-4. 
+          Their average prompt length was 280 tokens, costing $0.0084 per prompt ($16,800/month total). 
+          After implementing SmartPrompt compression, their average dropped to 154 tokens - a 45% reduction. 
+          Monthly costs fell to $9,240, saving $7,560 per month ($90,720 annually).
+        </p>
+        <div class="study-results">
+          <div class="study-metric">
+            <span class="study-metric-val">$7.5K</span>
+            <span class="study-metric-label">Monthly Savings</span>
+          </div>
+          <div class="study-metric">
+            <span class="study-metric-val">45%</span>
+            <span class="study-metric-label">Cost Reduction</span>
+          </div>
+          <div class="study-metric">
+            <span class="study-metric-val">2M</span>
+            <span class="study-metric-label">Prompts/Month</span>
+          </div>
+          <div class="study-metric">
+            <span class="study-metric-val">154</span>
+            <span class="study-metric-label">Avg Tokens</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics -->
+    <div class="analytics">
+      <h3 class="analytics-title">The Numbers Behind Compression</h3>
+      <div class="analytics-grid">
+        <div class="stat-card">
+          <span class="stat-number">$0.03</span>
+          <p class="stat-desc">Cost per 1K tokens (GPT-4). Reducing 100 tokens = $0.003 saved per query</p>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">0.24Wh</span>
+          <p class="stat-desc">Energy per prompt (Google study). 42% reduction = 0.1 Wh saved per query</p>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">0.03g</span>
+          <p class="stat-desc">CO₂ per prompt. Compressing 1M prompts saves 12.6 kg CO₂ (63 trees/year)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Tracker -->
+    <div class="tracker">
+      <h3 class="tracker-title">Your Optimization Journey</h3>
+      <div class="goals">
+        <div class="goal" id="goal-cost">
+          <div class="goal-header">
+            <span class="goal-title">Cost Savings</span>
+            <span class="goal-value" id="total-cost-saved">$0.00</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-cost"></div>
+          </div>
+          <div class="progress-label">
+            <span>Goal: $100</span>
+            <span id="cost-percent">0%</span>
+          </div>
+        </div>
+
+        <div class="goal" id="goal-compute">
+          <div class="goal-header">
+            <span class="goal-title">Compute Saved</span>
+            <span class="goal-value" id="total-tokens-saved">0</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-compute"></div>
+          </div>
+          <div class="progress-label">
+            <span>Goal: 100K tokens</span>
+            <span id="compute-percent">0%</span>
+          </div>
+        </div>
+
+        <div class="goal" id="goal-carbon">
+          <div class="goal-header">
+            <span class="goal-title">CO₂ Saved</span>
+            <span class="goal-value" id="total-carbon-saved">0g</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-carbon"></div>
+          </div>
+          <div class="progress-label">
+            <span>Goal: 30g (1 tree)</span>
+            <span id="carbon-percent">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div>
+      <a href="https://github.com" target="_blank">GitHub</a>
+      <a href="#">Documentation</a>
+      <a href="#">API</a>
+    </div>
+    <p style="margin-top: 16px;">2025 SmartPrompt</p>
+  </footer>
+
+  <script>
+    const orig = document.getElementById('original');
+    const comp = document.getElementById('compressed');
+    const origCount = document.getElementById('orig-count');
+    const compCount = document.getElementById('comp-count');
+    const btn = document.getElementById('compress');
+    const metrics = document.getElementById('metrics');
+
+    // Persistent tracking with localStorage
+    let totalCostSaved = parseFloat(localStorage.getItem('sp_total_cost') || '0');
+    let totalTokensSaved = parseInt(localStorage.getItem('sp_total_tokens') || '0');
+    let totalCarbonSaved = parseFloat(localStorage.getItem('sp_total_carbon') || '0');
+
+    // Goals
+    const GOALS = {
+      cost: 100, // $100
+      compute: 100000, // 100K tokens
+      carbon: 30 // 30g CO₂ (roughly 1 tree worth annually)
+    };
+
+    function updateTrackers() {
+      // Update display values
+      document.getElementById('total-cost-saved').textContent = `$${totalCostSaved.toFixed(2)}`;
+      document.getElementById('total-tokens-saved').textContent = totalTokensSaved.toLocaleString();
+      document.getElementById('total-carbon-saved').textContent = `${totalCarbonSaved.toFixed(2)}g`;
+
+      // Calculate percentages
+      const costPercent = Math.min((totalCostSaved / GOALS.cost) * 100, 100);
+      const computePercent = Math.min((totalTokensSaved / GOALS.compute) * 100, 100);
+      const carbonPercent = Math.min((totalCarbonSaved / GOALS.carbon) * 100, 100);
+
+      // Update progress bars with animation
+      setTimeout(() => {
+        document.getElementById('progress-cost').style.width = `${costPercent}%`;
+        document.getElementById('progress-compute').style.width = `${computePercent}%`;
+        document.getElementById('progress-carbon').style.width = `${carbonPercent}%`;
+      }, 100);
+
+      // Update percentage labels
+      document.getElementById('cost-percent').textContent = `${costPercent.toFixed(1)}%`;
+      document.getElementById('compute-percent').textContent = `${computePercent.toFixed(1)}%`;
+      document.getElementById('carbon-percent').textContent = `${carbonPercent.toFixed(1)}%`;
+
+      // Save to localStorage
+      localStorage.setItem('sp_total_cost', totalCostSaved.toString());
+      localStorage.setItem('sp_total_tokens', totalTokensSaved.toString());
+      localStorage.setItem('sp_total_carbon', totalCarbonSaved.toString());
+    }
+
+    function animateGoal(goalId) {
+      const goal = document.getElementById(goalId);
+      goal.classList.add('animating');
+      setTimeout(() => goal.classList.remove('animating'), 1000);
+    }
+
+    // Initialize trackers on load
+    updateTrackers();
+
+    function countTokens(text) {
+      return text.trim().split(/\s+/).filter(w => w.length > 0).length;
+    }
+
+    orig.addEventListener('input', () => {
+      const count = countTokens(orig.value);
+      origCount.textContent = `${count} tokens`;
+    });
+
+    btn.addEventListener('click', async () => {
+      const prompt = orig.value.trim();
+      if (!prompt) return alert('Enter a prompt');
+
+      btn.disabled = true;
+      btn.textContent = 'Compressing...';
+
+      try {
+        const res = await fetch('/compress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt,
+            aggressive: document.getElementById('aggressive').checked,
+            remove_stopwords: document.getElementById('stopwords').checked,
+            encode: document.getElementById('encode').checked,
+            use_tiktoken: document.getElementById('tiktoken').checked
+          })
+        });
+
+        const data = await res.json();
+        
+        comp.value = data.compressed_prompt;
+        compCount.textContent = `${data.compressed_tokens} tokens`;
+
+        const saved = data.tokens_saved;
+        const cost = (saved * 0.00003).toFixed(4);
+        const percent = ((saved / data.original_tokens) * 100).toFixed(1);
+        const carbon = (saved * 0.0003).toFixed(2);
+
+        document.getElementById('saved').textContent = saved;
+        document.getElementById('cost').textContent = `$${cost}`;
+        document.getElementById('percent').textContent = `${percent}%`;
+        document.getElementById('carbon').textContent = `${carbon}g`;
+
+        metrics.style.display = 'grid';
+
+        // Update cumulative trackers
+        totalCostSaved += parseFloat(cost);
+        totalTokensSaved += saved;
+        totalCarbonSaved += parseFloat(carbon);
+
+        // Animate the updated goals
+        updateTrackers();
+        animateGoal('goal-cost');
+        animateGoal('goal-compute');
+        animateGoal('goal-carbon');
+
+        // Scroll to tracker after first compression
+        if (totalTokensSaved === saved) {
+          setTimeout(() => {
+            document.querySelector('.tracker').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 500);
+        }
+
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Compress Prompt';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1427 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SmartPrompt — Optimize Your AI Costs, Reduce Carbon Footprint</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #818cf8;
+        --primary-dark: #4f46e5;
+        --primary-light: #a5b4fc;
+        --secondary: #22d3ee;
+        --accent: #f43f5e;
+        --bg-dark: #0a0a0f;
+        --bg-darker: #050508;
+        --bg-card: #14141f;
+        --text-primary: #ffffff;
+        --text-secondary: #a1a1aa;
+        --text-muted: #71717a;
+        --border: #27272a;
+        --success: #10b981;
+        --warning: #f59e0b;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        scroll-snap-type: y proximity;
+      }
+
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        line-height: 1.6;
+        color: var(--text-primary);
+        overflow-x: hidden;
+        background: var(--bg-dark);
+        position: relative;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(129, 140, 248, 0.15), transparent),
+          radial-gradient(ellipse 60% 50% at 50% 120%, rgba(34, 211, 238, 0.1), transparent);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* Navigation */
+      nav {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        background: rgba(10, 10, 15, 0.8);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        transition: all 0.3s ease;
+      }
+
+      nav.scrolled {
+        background: rgba(10, 10, 15, 0.95);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .nav-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo-nav {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: all 0.3s ease;
+      }
+
+      .logo-nav:hover {
+        color: var(--primary-light);
+      }
+
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .logo-icon::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.6s ease;
+      }
+
+      .logo-nav:hover .logo-icon::before {
+        transform: translateX(100%);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 40px;
+        list-style: none;
+      }
+
+      .nav-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 15px;
+        transition: color 0.3s ease;
+        position: relative;
+      }
+
+      .nav-links a::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        transition: width 0.3s ease;
+      }
+
+      .nav-links a:hover {
+        color: var(--text-primary);
+      }
+
+      .nav-links a:hover::after {
+        width: 100%;
+      }
+
+      .cta-btn {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 12px 28px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(129, 140, 248, 0.4);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .cta-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s ease;
+      }
+
+      .cta-btn:hover::before {
+        left: 100%;
+      }
+
+      .cta-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 30px rgba(129, 140, 248, 0.6);
+      }
+
+      /* Hero Section */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-dark);
+        padding: 140px 40px 80px;
+        position: relative;
+        overflow: hidden;
+        scroll-snap-align: start;
+      }
+
+      .hero::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 1000px;
+        height: 1000px;
+        background: radial-gradient(circle, rgba(129, 140, 248, 0.15) 0%, transparent 70%);
+        animation: pulse-glow 8s ease-in-out infinite;
+      }
+
+      @keyframes pulse-glow {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+        50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+      }
+
+      .grid-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+          linear-gradient(rgba(129, 140, 248, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(129, 140, 248, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        pointer-events: none;
+      }
+
+      .hero-content {
+        max-width: 1400px;
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 80px;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-text h1 {
+        font-size: 72px;
+        font-weight: 900;
+        line-height: 1.1;
+        margin-bottom: 28px;
+        background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary-light) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: fadeInUp 0.8s ease-out;
+        letter-spacing: -2px;
+      }
+
+      .hero-text .gradient-text {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .hero-text .subtitle {
+        font-size: 24px;
+        color: var(--text-secondary);
+        margin-bottom: 32px;
+        animation: fadeInUp 0.8s ease-out 0.2s backwards;
+        font-weight: 400;
+        letter-spacing: -0.5px;
+      }
+
+      .hero-text .description {
+        font-size: 18px;
+        color: var(--text-muted);
+        margin-bottom: 40px;
+        line-height: 1.8;
+        animation: fadeInUp 0.8s ease-out 0.4s backwards;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .hero-buttons {
+        display: flex;
+        gap: 20px;
+        animation: fadeInUp 0.8s ease-out 0.6s backwards;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 18px 40px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 17px;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 30px rgba(129, 140, 248, 0.4);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.6s ease;
+      }
+
+      .btn-primary:hover::before {
+        left: 100%;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(129, 140, 248, 0.6);
+      }
+
+      .btn-secondary {
+        background: transparent;
+        color: var(--text-primary);
+        padding: 18px 40px;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 17px;
+        transition: all 0.3s ease;
+      }
+
+      .btn-secondary:hover {
+        border-color: var(--primary);
+        background: rgba(129, 140, 248, 0.1);
+        transform: translateY(-3px);
+      }
+
+      .hero-visual {
+        position: relative;
+        animation: fadeInUp 0.8s ease-out 0.3s backwards;
+      }
+
+      .stats-card {
+        background: var(--bg-card);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      }
+
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+        margin-bottom: 24px;
+      }
+
+      .stat-item {
+        text-align: center;
+        padding: 24px;
+        background: rgba(129, 140, 248, 0.05);
+        border-radius: 16px;
+        border: 1px solid rgba(129, 140, 248, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .stat-item:hover {
+        background: rgba(129, 140, 248, 0.1);
+        border-color: rgba(129, 140, 248, 0.3);
+        transform: translateY(-5px);
+      }
+
+      .stat-number {
+        font-size: 42px;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .stat-label {
+        font-size: 13px;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+      }
+
+      /* Problem Section */
+      .problem-section {
+        min-height: 100vh;
+        padding: 120px 40px;
+        background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+        position: relative;
+        scroll-snap-align: start;
+        transition: background 1s ease;
+      }
+
+      .section-header {
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto 80px;
+      }
+
+      .section-tag {
+        display: inline-block;
+        background: rgba(0, 0, 0, 0.05);
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+      }
+
+      .section-header h2 {
+        font-size: 48px;
+        font-weight: 900;
+        margin-bottom: 20px;
+        line-height: 1.2;
+      }
+
+      .section-header p {
+        font-size: 20px;
+        color: var(--text-muted);
+      }
+
+      .problem-grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 32px;
+      }
+
+      .problem-card {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s ease;
+        border: 2px solid transparent;
+      }
+
+      .problem-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+        border-color: var(--warning-orange);
+      }
+
+      .problem-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--warning-orange), #fb923c);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 24px;
+        font-size: 28px;
+      }
+
+      .problem-card h3 {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: var(--text-dark);
+      }
+
+      .problem-card p {
+        color: var(--text-muted);
+        line-height: 1.8;
+      }
+
+      .impact-number {
+        font-size: 48px;
+        font-weight: 900;
+        color: var(--warning-orange);
+        margin: 16px 0;
+      }
+
+      /* Solution Section */
+      .solution-section {
+        min-height: 100vh;
+        padding: 120px 40px;
+        background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+        scroll-snap-align: start;
+      }
+
+      .solution-content {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px;
+        margin-top: 60px;
+      }
+
+      .feature-card {
+        background: white;
+        padding: 48px;
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s ease;
+      }
+
+      .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 0;
+        background: var(--eco-green);
+        transition: height 0.4s ease;
+      }
+
+      .feature-card:hover::before {
+        height: 100%;
+      }
+
+      .feature-card:hover {
+        transform: translateX(10px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+      }
+
+      .feature-number {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--eco-green);
+        margin-bottom: 16px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      .feature-card h3 {
+        font-size: 28px;
+        font-weight: 800;
+        margin-bottom: 16px;
+        color: var(--text-dark);
+      }
+
+      .feature-card p {
+        color: var(--text-muted);
+        line-height: 1.8;
+        font-size: 16px;
+      }
+
+      /* Case Studies Section */
+      .case-studies-section {
+        min-height: 100vh;
+        padding: 120px 40px;
+        background: #ffffff;
+        scroll-snap-align: start;
+      }
+
+      .case-study-grid {
+        max-width: 1400px;
+        margin: 60px auto 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 40px;
+      }
+
+      .case-study-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s ease;
+        border: 2px solid transparent;
+      }
+
+      .case-study-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        border-color: var(--eco-green);
+      }
+
+      .case-study-image {
+        height: 240px;
+        background: linear-gradient(135deg, var(--eco-green), var(--eco-dark));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 64px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .case-study-image::before {
+        content: '';
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+        animation: pulse 3s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 0.5; }
+        50% { transform: scale(1.2); opacity: 0.8; }
+      }
+
+      .case-study-content {
+        padding: 40px;
+      }
+
+      .case-study-tag {
+        display: inline-block;
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--eco-dark);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+      }
+
+      .case-study-card h3 {
+        font-size: 24px;
+        font-weight: 800;
+        margin-bottom: 12px;
+        color: var(--text-dark);
+      }
+
+      .case-study-card p {
+        color: var(--text-muted);
+        line-height: 1.8;
+        margin-bottom: 24px;
+      }
+
+      .case-study-metrics {
+        display: flex;
+        gap: 24px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .metric {
+        flex: 1;
+      }
+
+      .metric-value {
+        font-size: 28px;
+        font-weight: 900;
+        color: var(--eco-green);
+        display: block;
+      }
+
+      .metric-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* Carbon Impact Section */
+      .carbon-section {
+        min-height: 100vh;
+        padding: 120px 40px;
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        scroll-snap-align: start;
+        position: relative;
+      }
+
+      .carbon-visualization {
+        max-width: 1200px;
+        margin: 60px auto;
+        background: white;
+        border-radius: 24px;
+        padding: 60px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        border: 3px solid var(--danger-red);
+      }
+
+      .comparison-grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 40px;
+        align-items: center;
+        margin-bottom: 60px;
+      }
+
+      .comparison-item {
+        text-align: center;
+        padding: 40px;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .comparison-item.before {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        border: 2px solid var(--danger-red);
+      }
+
+      .comparison-item.after {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        border: 2px solid var(--eco-green);
+      }
+
+      .comparison-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+      }
+
+      .comparison-value {
+        font-size: 48px;
+        font-weight: 900;
+        margin-bottom: 12px;
+      }
+
+      .comparison-item.before .comparison-value {
+        color: var(--danger-red);
+      }
+
+      .comparison-item.after .comparison-value {
+        color: var(--eco-green);
+      }
+
+      .comparison-label {
+        font-size: 16px;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+
+      .arrow {
+        font-size: 48px;
+        color: var(--text-muted);
+      }
+
+      .global-impact {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+        padding: 40px;
+        border-radius: 20px;
+        border: 2px solid var(--danger-red);
+      }
+
+      .global-impact h3 {
+        font-size: 32px;
+        font-weight: 900;
+        margin-bottom: 24px;
+        color: var(--danger-red);
+      }
+
+      .impact-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 32px;
+      }
+
+      .impact-stat {
+        text-align: center;
+      }
+
+      .impact-stat-number {
+        font-size: 42px;
+        font-weight: 900;
+        color: var(--danger-red);
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .impact-stat-label {
+        font-size: 14px;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+
+      /* CTA Section */
+      .cta-section {
+        min-height: 80vh;
+        padding: 120px 40px;
+        background: linear-gradient(135deg, var(--eco-dark) 0%, var(--eco-green) 100%);
+        color: white;
+        text-align: center;
+        scroll-snap-align: start;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .cta-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+        animation: rotate 30s linear infinite;
+      }
+
+      @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      .cta-content {
+        max-width: 800px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+      }
+
+      .cta-content h2 {
+        font-size: 56px;
+        font-weight: 900;
+        margin-bottom: 24px;
+        line-height: 1.2;
+      }
+
+      .cta-content p {
+        font-size: 24px;
+        margin-bottom: 48px;
+        opacity: 0.9;
+      }
+
+      .cta-button {
+        background: white;
+        color: var(--eco-dark);
+        padding: 24px 48px;
+        border-radius: 16px;
+        text-decoration: none;
+        font-weight: 800;
+        font-size: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      .cta-button:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Footer */
+      footer {
+        background: #0a0a0a;
+        color: #999;
+        padding: 60px 40px 30px;
+      }
+
+      .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 60px;
+        margin-bottom: 40px;
+      }
+
+      .footer-brand h3 {
+        color: white;
+        font-size: 24px;
+        font-weight: 800;
+        margin-bottom: 16px;
+      }
+
+      .footer-brand p {
+        line-height: 1.8;
+        margin-bottom: 24px;
+      }
+
+      .social-links {
+        display: flex;
+        gap: 16px;
+      }
+
+      .social-links a {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+      }
+
+      .social-links a:hover {
+        background: var(--eco-green);
+        transform: translateY(-3px);
+      }
+
+      .footer-links h4 {
+        color: white;
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .footer-links ul {
+        list-style: none;
+      }
+
+      .footer-links a {
+        color: #999;
+        text-decoration: none;
+        display: block;
+        padding: 8px 0;
+        transition: color 0.3s ease;
+      }
+
+      .footer-links a:hover {
+        color: var(--eco-green);
+      }
+
+      .footer-bottom {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 30px;
+        text-align: center;
+        font-size: 14px;
+      }
+
+      /* Responsive */
+      @media (max-width: 1024px) {
+        .hero-content {
+          grid-template-columns: 1fr;
+          text-align: center;
+        }
+
+        .hero-text h1 {
+          font-size: 48px;
+        }
+
+        .features-grid,
+        .problem-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .comparison-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .footer-content {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .nav-links {
+          display: none;
+        }
+
+        .hero-text h1 {
+          font-size: 36px;
+        }
+
+        .section-header h2 {
+          font-size: 32px;
+        }
+
+        .case-study-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .impact-stats {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Scroll Progress Bar */
+      .scroll-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 4px;
+        background: var(--eco-green);
+        z-index: 9999;
+        transition: width 0.1s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+      <div class="nav-container">
+        <a href="#" class="logo-nav">
+          <div class="logo-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L3 7v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V7l-9-5z" fill="white"/>
+            </svg>
+          </div>
+          Green AI
+        </a>
+        <ul class="nav-links">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#problem">The Problem</a></li>
+          <li><a href="#solution">Our Solution</a></li>
+          <li><a href="#cases">Case Studies</a></li>
+          <li><a href="#impact">Impact</a></li>
+        </ul>
+        <a href="/static/index.html" class="cta-btn">Try It Now →</a>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1>Every Conversation Has a Carbon Cost</h1>
+          <p class="subtitle">Make it count. Make it green.</p>
+          <p class="description">
+            Billions of AI interactions happen daily. Each one consumes energy, emits carbon, and uses water. 
+            Green AI optimizes your prompts to reduce waste without compromising quality.
+          </p>
+          <div class="hero-buttons">
+            <a href="/static/index.html" class="btn-primary">
+              Start Saving Carbon
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+            <a href="#problem" class="btn-secondary">Learn More</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="stats-card">
+            <div class="stat-grid">
+              <div class="stat-item">
+                <span class="stat-number">42%</span>
+                <span class="stat-label">Token Reduction</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">30%</span>
+                <span class="stat-label">CO₂ Saved</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">1.2 MWh</span>
+                <span class="stat-label">Energy Saved</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">100+</span>
+                <span class="stat-label">Homes Powered</span>
+              </div>
+            </div>
+            <p style="text-align: center; color: var(--text-muted); font-size: 14px;">
+              Average results per 1M prompts/day
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="problem-section" id="problem">
+      <div class="section-header">
+        <span class="section-tag">🔥 The Problem</span>
+        <h2>AI's Hidden Environmental Crisis</h2>
+        <p>The invisible carbon footprint of every "Hello, ChatGPT"</p>
+      </div>
+      <div class="problem-grid">
+        <div class="problem-card">
+          <div class="problem-icon">⚡</div>
+          <h3>Energy Consumption</h3>
+          <p>Every Gemini prompt uses 0.24 watt-hours of energy. That's watching TV for 9 seconds.</p>
+          <div class="impact-number">1.2 TWh</div>
+          <p style="font-size: 14px;">Annual AI energy consumption (growing exponentially)</p>
+        </div>
+        <div class="problem-card">
+          <div class="problem-icon">💨</div>
+          <h3>Carbon Emissions</h3>
+          <p>0.03 grams of CO₂ per prompt. Sounds small? Multiply by billions of daily interactions.</p>
+          <div class="impact-number">500k tons</div>
+          <p style="font-size: 14px;">Annual CO₂ from AI queries alone</p>
+        </div>
+        <div class="problem-card">
+          <div class="problem-icon">💧</div>
+          <h3>Water Usage</h3>
+          <p>Data centers consume 0.26 mL of water per prompt for cooling. Five drops add up fast.</p>
+          <div class="impact-number">400M L</div>
+          <p style="font-size: 14px;">Water consumed annually by AI infrastructure</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="solution-section" id="solution">
+      <div class="solution-content">
+        <div class="section-header">
+          <span class="section-tag">✅ Our Solution</span>
+          <h2>Carbon-Aware Prompt Optimization (CAPO)</h2>
+          <p>Surgical fixes for massive problems. Zero friction, maximum impact.</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-number">Feature 01</div>
+            <h3>🌱 Smart Prompting</h3>
+            <p>
+              Intelligently compress prompts by removing redundancy, filler words, and repeated phrases. 
+              Preserve meaning, slash tokens, reduce carbon.
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-number">Feature 02</div>
+            <h3>📊 Real-Time Impact</h3>
+            <p>
+              See exactly how much energy, CO₂, and water you're saving with every optimization. 
+              Make the invisible visible.
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-number">Feature 03</div>
+            <h3>🎯 Zero Disruption</h3>
+            <p>
+              Plug-and-play integration with any LLM API. No infrastructure changes. 
+              No user behavior modification required.
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-number">Feature 04</div>
+            <h3>🚀 Scalable Impact</h3>
+            <p>
+              From individual users to enterprise scale. Phase 1 today, full-stack carbon awareness tomorrow.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Case Studies Section -->
+    <section class="case-studies-section" id="cases">
+      <div class="section-header">
+        <span class="section-tag">📈 Proven Results</span>
+        <h2>Real Impact, Real Data</h2>
+        <p>How Green AI is making a difference across industries</p>
+      </div>
+      <div class="case-study-grid">
+        <div class="case-study-card">
+          <div class="case-study-image">🏢</div>
+          <div class="case-study-content">
+            <span class="case-study-tag">Enterprise</span>
+            <h3>Tech Startup Reduces AI Costs by 40%</h3>
+            <p>
+              A Series B startup using AI for customer support compressed 2M prompts/month, 
+              saving $8,400 in API costs and preventing 1.2 tons of CO₂ emissions.
+            </p>
+            <div class="case-study-metrics">
+              <div class="metric">
+                <span class="metric-value">$8.4K</span>
+                <span class="metric-label">Monthly Savings</span>
+              </div>
+              <div class="metric">
+                <span class="metric-value">1.2T</span>
+                <span class="metric-label">CO₂ Prevented</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="case-study-card">
+          <div class="case-study-image">🎓</div>
+          <div class="case-study-content">
+            <span class="case-study-tag">Education</span>
+            <h3>University Cuts Research Computing Footprint</h3>
+            <p>
+              A major research university optimized 500K+ AI prompts across labs, 
+              reducing their carbon footprint equivalent to planting 15,000 trees.
+            </p>
+            <div class="case-study-metrics">
+              <div class="metric">
+                <span class="metric-value">38%</span>
+                <span class="metric-label">Token Reduction</span>
+              </div>
+              <div class="metric">
+                <span class="metric-value">15K</span>
+                <span class="metric-label">Trees Equiv.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="case-study-card">
+          <div class="case-study-image">💼</div>
+          <div class="case-study-content">
+            <span class="case-study-tag">Individual</span>
+            <h3>Developer Saves 100 Hours of TV Energy</h3>
+            <p>
+              A single developer using AI coding assistants optimized daily prompts over 6 months, 
+              saving enough energy to power their home office for a month.
+            </p>
+            <div class="case-study-metrics">
+              <div class="metric">
+                <span class="metric-value">12K</span>
+                <span class="metric-label">Prompts Saved</span>
+              </div>
+              <div class="metric">
+                <span class="metric-value">45%</span>
+                <span class="metric-label">Cost Reduction</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Carbon Impact Section -->
+    <section class="carbon-section" id="impact">
+      <div class="section-header">
+        <span class="section-tag" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-red);">🔴 Critical Impact Zone</span>
+        <h2>The Scale of the Problem</h2>
+        <p>If we do nothing, here's what happens...</p>
+      </div>
+      <div class="carbon-visualization">
+        <div class="comparison-grid">
+          <div class="comparison-item before">
+            <div class="comparison-icon">🔴</div>
+            <div class="comparison-value">250</div>
+            <div class="comparison-label">Tokens per Prompt (Average)</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="comparison-item after">
+            <div class="comparison-icon">🌱</div>
+            <div class="comparison-value">145</div>
+            <div class="comparison-label">Tokens with Green AI</div>
+          </div>
+        </div>
+        <div class="global-impact">
+          <h3>🌍 Global Impact if 10% of AI Users Adopt Green AI</h3>
+          <div class="impact-stats">
+            <div class="impact-stat">
+              <span class="impact-stat-number">2.4 TWh</span>
+              <span class="impact-stat-label">Annual energy saved<br/>(Enough to power 200,000 homes)</span>
+            </div>
+            <div class="impact-stat">
+              <span class="impact-stat-number">1.2M tons</span>
+              <span class="impact-stat-label">CO₂ emissions prevented<br/>(Equivalent to 260M tree seedlings)</span>
+            </div>
+            <div class="impact-stat">
+              <span class="impact-stat-number">800M L</span>
+              <span class="impact-stat-label">Water conserved<br/>(Enough for 4,000 people per year)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <div class="cta-content">
+        <h2>Ready to Make Every Word Count?</h2>
+        <p>Join the movement. Start reducing your AI carbon footprint today.</p>
+        <a href="/static/index.html" class="cta-button">
+          🌍 Start Using Green AI
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3>🌍 Green AI</h3>
+          <p>Building carbon-aware AI systems for a sustainable future. One prompt at a time.</p>
+          <div class="social-links">
+            <a href="#" title="GitHub">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+            </a>
+            <a href="#" title="Twitter">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+              </svg>
+            </a>
+            <a href="#" title="LinkedIn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/>
+                <circle cx="4" cy="4" r="2"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="/static/index.html">Smart Prompting</a></li>
+            <li><a href="#solution">Features</a></li>
+            <li><a href="#cases">Case Studies</a></li>
+            <li><a href="#">Pricing</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Team</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Careers</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="#">Documentation</a></li>
+            <li><a href="#">API</a></li>
+            <li><a href="#">Research</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Green AI. All rights reserved. | Building a sustainable AI future.</p>
+      </div>
+    </footer>
+
+    <script>
+      // Scroll progress bar
+      window.addEventListener('scroll', () => {
+        const scrollProgress = document.getElementById('scrollProgress');
+        const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (window.scrollY / windowHeight) * 100;
+        scrollProgress.style.width = scrolled + '%';
+      });
+
+      // Navbar scroll effect
+      const navbar = document.getElementById('navbar');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      });
+
+      // Smooth scroll for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+
+      // Intersection Observer for fade-in animations
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, observerOptions);
+
+      // Observe all cards
+      document.querySelectorAll('.problem-card, .feature-card, .case-study-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = 'all 0.6s ease';
+        observer.observe(card);
+      });
+
+      // Parallax effect for hero
+      window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY;
+        const hero = document.querySelector('.hero');
+        if (hero && scrolled < window.innerHeight) {
+          hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+        }
+      });
+    </script>
+  </body>
+</html>

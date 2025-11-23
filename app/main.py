@@ -57,5 +57,5 @@ async def compress_endpoint(req: CompressRequest):
 
 @app.get("/")
 async def root():
-    # Redirect to the static frontend page
-    return RedirectResponse(url="/static/index.html")
+    # Redirect to the landing page
+    return RedirectResponse(url="/static/landing.html")
