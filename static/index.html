@@ -1,0 +1,420 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Prompt Compressor — Compact your prompts</title>
+    <style>
+      :root{
+        --bg1: #0f1724;
+        --bg2: #0b1220;
+        --card: rgba(255,255,255,0.04);
+        --accent: #7c5cff;
+        --accent-2: #2dd4bf;
+        --muted: #9aa4b2;
+        --glass: rgba(255,255,255,0.03);
+      }
+      html,body{height:100%;}
+      body{
+        margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        background: linear-gradient(135deg,var(--bg1),var(--bg2)); color:#e6eef8; -webkit-font-smoothing:antialiased;
+        display:flex; align-items:center; justify-content:center; padding:32px;
+      }
+      .app{ width:100%; max-width:1100px; }
+      .header{ display:flex; align-items:center; gap:16px; margin-bottom:18px; }
+      .logo{ width:52px; height:52px; border-radius:12px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); display:flex; align-items:center; justify-content:center; box-shadow:0 6px 20px rgba(30,20,60,0.4); }
+      .logo svg{ width:30px; height:30px; }
+  .logo:hover{ transform:translateY(-4px) rotate(-6deg); transition:transform .28s cubic-bezier(.2,.8,.2,1); }
+  .logo{ transition:transform .38s cubic-bezier(.2,.8,.2,1); }
+      h1{ font-size:20px; margin:0 }
+      p.lead{ margin:0; color:var(--muted); font-size:13px }
+
+      .grid{ display:grid; grid-template-columns: 1fr 420px; gap:20px; align-items:start; }
+
+      .card{ background:var(--card); border-radius:12px; padding:18px; box-shadow: 0 6px 30px rgba(2,6,23,0.6); }
+
+      textarea#prompt{ width:100%; height:220px; resize:vertical; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.03); background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00)); color:inherit; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size:14px }
+
+      .controls{ display:flex; gap:12px; align-items:center; margin-top:12px }
+  .btn{ background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#071127; border:none; padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer; box-shadow:0 8px 24px rgba(124,92,255,0.18); transform:translateY(0); transition:transform .18s ease, box-shadow .18s ease; }
+  .btn:hover{ transform:translateY(-3px); box-shadow:0 14px 40px rgba(124,92,255,0.22); }
+  .btn:active{ transform:translateY(-1px) scale(.995); }
+      .btn.ghost{ background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--muted); font-weight:600 }
+      .muted{ color:var(--muted); font-size:13px }
+
+      .result{ white-space:pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size:14px; padding:12px; border-radius:8px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00)); border:1px solid rgba(255,255,255,0.02); }
+
+  .ref{ color:var(--accent-2); background:rgba(45,212,191,0.06); padding:2px 6px; border-radius:6px; margin:0 2px; cursor:pointer; font-weight:600; transition:transform .14s ease, box-shadow .14s ease; }
+  .ref:hover{ transform:translateY(-2px); box-shadow:0 8px 20px rgba(45,212,191,0.06); }
+  .ref-value{ color:#061321; background:var(--accent-2); padding:4px 8px; border-radius:8px; margin-left:8px; font-weight:600; display:inline-block; transform:translateY(-6px) scale(.98); opacity:0; transition:transform .22s cubic-bezier(.2,.8,.2,1),opacity .22s cubic-bezier(.2,.8,.2,1); }
+  .ref-value.show{ transform:none; opacity:1 }
+  .ref-value.hide{ transform:translateY(-6px) scale(.98); opacity:0 }
+  .badge{ background:rgba(255,255,255,0.06); color:var(--accent-2); padding:6px 10px; border-radius:999px; font-weight:700; display:inline-flex; gap:8px; align-items:center }
+  .badge .delta{ color:#dbeffd; font-weight:800; }
+  .pulse{ animation:pop .42s cubic-bezier(.2,.8,.2,1); }
+  @keyframes pop{ 0%{ transform:scale(.85); opacity:.7 } 60%{ transform:scale(1.06); opacity:1 } 100%{ transform:scale(1); opacity:1 } }
+
+      .panel{ display:flex; flex-direction:column; gap:12px }
+      .stats{ display:flex; gap:12px; flex-wrap:wrap }
+      .stat{ background:var(--glass); padding:10px 12px; border-radius:10px; color:var(--muted); min-width:120px }
+
+      .replacements{ max-height:260px; overflow:auto; padding:10px; border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00)); border:1px solid rgba(255,255,255,0.02); }
+
+      footer{ margin-top:14px; color:var(--muted); font-size:13px; }
+
+      @media (max-width:980px){ .grid{ grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="header">
+        <div class="logo" aria-hidden>
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/><path d="M12 5v14" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/></svg>
+        </div>
+        <div>
+          <h1>Prompt Compressor</h1>
+          <p class="lead">Compress prompts by removing fillers and replacing repeated phrases with short references. Save tokens, keep meaning.</p>
+        </div>
+        <div style="margin-left:auto; display:flex; align-items:center; gap:12px">
+          <div class="badge" title="Total tokens you've saved (stored locally)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="transform:translateY(1px)"><path d="M12 2v20" stroke="white" opacity="0.9" stroke-width="1.4" stroke-linecap="round"/><path d="M5 8h14" stroke="white" opacity="0.7" stroke-width="1.2" stroke-linecap="round"/></svg>
+            <div>
+              <div style="font-size:11px; color:var(--muted);">Total saved</div>
+              <div id="totalSaved" style="font-size:14px;">0</div>
+            </div>
+          </div>
+          <button id="resetTotal" class="btn ghost" style="padding:8px 10px">Reset</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <div class="card">
+            <label class="muted">Enter or paste your prompt</label>
+            <textarea id="prompt">Paste your prompt here...</textarea>
+            <div class="controls">
+              <label style="display:flex;align-items:center;gap:8px" class="muted"><input type="checkbox" id="tiktoken"> Use tiktoken (if available)</label>
+              <label style="display:flex;align-items:center;gap:8px" class="muted"><input type="checkbox" id="aggressive"> Aggressive</label>
+              <label style="display:flex;align-items:center;gap:8px" class="muted"><input type="checkbox" id="remove_stopwords"> Stopwords</label>
+              <label style="display:flex;align-items:center;gap:8px" class="muted"><input type="checkbox" id="remove_punctuation"> No punctuation</label>
+              <label style="display:flex;align-items:center;gap:8px" class="muted"><input type="checkbox" id="light_stemming"> Light stemming</label>
+              <label style="display:flex;align-items:center;gap:8px" class="muted"><input type="checkbox" id="super_aggressive"> Super aggressive</label>
+              <button id="compressBtn" class="btn">Compress</button>
+              <button id="expandAll" class="btn ghost">Expand all</button>
+              <button id="collapseAll" class="btn ghost">Collapse all</button>
+              <div style="flex:1"></div>
+              <button id="copyBtn" class="btn ghost">Copy compressed</button>
+            </div>
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <div>
+                <div style="font-weight:700">Result</div>
+                <div class="muted" style="font-size:12px">Click a reference to preview the original phrase.</div>
+              </div>
+            </div>
+            <div id="result" class="result">—</div>
+            <footer id="stats" class="muted">—</footer>
+          </div>
+        </div>
+
+        <div>
+          <div class="card panel">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:700">Replacements</div>
+              <div class="muted">Click a ref in the text to expand</div>
+            </div>
+            <div id="replacements" class="replacements muted">No replacements.</div>
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div class="card panel">
+            <div style="font-weight:700">Stats</div>
+            <div class="stats" id="statList">
+              <div class="stat">Original tokens: <span id="origTokens">—</span></div>
+              <div class="stat">Compressed tokens: <span id="compTokens">—</span></div>
+              <div class="stat">Tokens saved: <span id="savedTokens">—</span></div>
+            </div>
+            <div style="height:6px"></div>
+            <div class="muted">Tip: try prompts with repeated instructions or repeated context to see larger savings.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="max-width:1100px; margin:18px auto 0;">
+      <div class="card panel" style="padding:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <div style="font-weight:700">History</div>
+          <div style="display:flex; gap:8px; align-items:center">
+            <div class="muted" style="font-size:13px">Local history of compress runs</div>
+            <button id="clearHistory" class="btn ghost" style="padding:8px 10px">Clear</button>
+          </div>
+        </div>
+        <div id="historyList" style="max-height:220px; overflow:auto; margin-top:12px; color:var(--muted);">
+          <div style="padding:8px;">No history yet. Run a compression to record history.</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // escape html
+      const escape = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+
+      function renderCompressedWithRefs(text) {
+        // text is escaped already
+        let out = text.replace(/\[REF(\d+)\]/g, (m, id) => `<span class="ref" data-ref="REF${id}">[REF${id}]</span>`);
+        // Also make plain replacement keys clickable (e.g., acronyms like TSV)
+        try{
+          if(currentReplacements && Object.keys(currentReplacements).length){
+            // sort keys by length desc to avoid partial matches
+            const keys = Object.keys(currentReplacements).slice().sort((a,b)=>b.length - a.length);
+            for(const k of keys){
+              if(!k) continue;
+              // escape regex special chars in key
+              const esc = k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              // Replace whole-word occurrences only
+              const re = new RegExp('\\b' + esc + '\\b', 'g');
+              out = out.replace(re, (m)=> `<span class="ref" data-ref="${encodeURIComponent(k)}">${escape(k)}</span>`);
+            }
+          }
+        }catch(e){ /* ignore rendering errors */ }
+        return out;
+      }
+
+      function buildReplacementsPanel(replacements){
+        const container = document.getElementById('replacements');
+        container.innerHTML = '';
+        if(!replacements || Object.keys(replacements).length===0){ container.textContent='No replacements.'; return }
+        const ul = document.createElement('ul'); ul.style.margin='0'; ul.style.paddingLeft='18px'; ul.style.color='var(--muted)';
+        for(const k of Object.keys(replacements)){
+          const li = document.createElement('li');
+          li.style.marginBottom='8px';
+          li.innerHTML = `<strong>${k}</strong>: <span style="color:var(--accent-2);">${escape(replacements[k])}</span>`;
+          ul.appendChild(li);
+        }
+        container.appendChild(ul);
+      }
+
+      function shouldCapitalizeBefore(el){
+        // Determine whether the inserted phrase should be capitalized based on prior character context.
+        // Look for previous text content before the element inside the same container.
+        const prev = el.previousSibling;
+        let lastChar = null;
+        if(prev){
+          if(prev.nodeType === Node.TEXT_NODE){
+            const txt = prev.textContent || '';
+            for(let i = txt.length - 1; i >= 0; --i){
+              const ch = txt[i];
+              if(!/\s/.test(ch)) { lastChar = ch; break }
+            }
+          } else if(prev.nodeType === Node.ELEMENT_NODE){
+            const txt = prev.innerText || '';
+            for(let i = txt.length - 1; i >= 0; --i){
+              const ch = txt[i];
+              if(!/\s/.test(ch)) { lastChar = ch; break }
+            }
+          }
+        }
+        // If there is no previous non-space char, or the previous char ends a sentence, capitalize.
+        if(!lastChar) return true;
+        if(/[.!?]/.test(lastChar)) return true;
+        return false;
+      }
+
+      function applyCapitalizationIfNeeded(phrase, el){
+        try{
+          if(!phrase) return phrase;
+          const cap = shouldCapitalizeBefore(el);
+          if(!cap) return phrase;
+          // Capitalize first letter of the first word (leave rest unchanged)
+          return phrase.charAt(0).toUpperCase() + phrase.slice(1);
+        }catch(e){ return phrase }
+      }
+
+      function wireRefClicks(){
+        document.querySelectorAll('.ref').forEach(el=>{
+          el.onclick = (e)=>{
+            const raw = e.target && e.target.dataset ? e.target.dataset.ref : null;
+            const key = raw ? decodeURIComponent(raw) : null;
+            // check next element
+            const next = e.target.nextElementSibling;
+            if(next && next.classList && next.classList.contains('ref-value')){
+              // toggle visibility with animation
+              if(next.classList.contains('show')){
+                next.classList.remove('show'); next.classList.add('hide');
+                // remove after animation
+                setTimeout(()=>{ try{ next.remove() }catch(_){} }, 240);
+              } else {
+                next.classList.remove('hide'); next.classList.add('show');
+              }
+              return;
+            }
+            // insert preview with capitalization-aware content
+            let phrase = currentReplacements[key || raw];
+            if(!phrase) return;
+            const node = document.createElement('span');
+            node.className='ref-value hide';
+            node.textContent = applyCapitalizationIfNeeded(phrase, e.target);
+            // insert then trigger show to animate
+            e.target.parentNode.insertBefore(node, e.target.nextSibling);
+            // ensure layout and then show
+            requestAnimationFrame(()=>{ node.classList.remove('hide'); node.classList.add('show'); });
+          }
+        })
+      }
+
+      let currentReplacements = {};
+
+      // initialize total saved from localStorage
+      const TOTAL_KEY = 'pc_total_saved';
+      function readTotal(){ return parseInt(localStorage.getItem(TOTAL_KEY) || '0', 10) }
+      function writeTotal(v){ localStorage.setItem(TOTAL_KEY, String(v)) }
+      function setTotalDom(v){ const el = document.getElementById('totalSaved'); el.textContent = v.toLocaleString(); el.classList.add('pulse'); setTimeout(()=>el.classList.remove('pulse'),420) }
+      setTotalDom(readTotal());
+
+      document.getElementById('compressBtn').onclick = async ()=>{
+        const prompt = document.getElementById('prompt').value;
+        const use_tiktoken = document.getElementById('tiktoken').checked;
+  const aggressive = document.getElementById('aggressive').checked;
+  const remove_stopwords = document.getElementById('remove_stopwords').checked;
+  const remove_punctuation = document.getElementById('remove_punctuation').checked;
+  const light_stemming = document.getElementById('light_stemming').checked;
+  const super_aggressive = document.getElementById('super_aggressive').checked;
+  const resp = await fetch('/compress',{method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({prompt, use_tiktoken, aggressive, remove_stopwords, remove_punctuation, light_stemming, super_aggressive})});
+        const data = await resp.json();
+  currentReplacements = data.meta && data.meta.replacements ? data.meta.replacements : {};
+
+        const escaped = escape(data.compressed_prompt);
+        const rendered = renderCompressedWithRefs(escaped);
+        document.getElementById('result').innerHTML = rendered;
+  buildReplacementsPanel(currentReplacements);
+  // show meta details briefly under the stats
+  const meta = data.meta || {};
+  const opts = meta.opts || {};
+  const details = `opts: ${JSON.stringify(opts)} | removed_fillers: ${meta.removed_fillers || 0} | stopwords: ${meta.removed_stopwords || 0} | punct: ${meta.removed_punctuation_tokens || 0} | stems: ${meta.removed_light_stems || 0}`;
+  document.getElementById('stats').textContent = details;
+        document.getElementById('origTokens').textContent = data.original_tokens;
+        document.getElementById('compTokens').textContent = data.compressed_tokens;
+        document.getElementById('savedTokens').textContent = data.tokens_saved;
+
+          // update cumulative total (localStorage) and animate change
+          const prev = readTotal();
+          const added = Number(data.tokens_saved) || 0;
+          const next = Math.max(0, prev + added);
+          writeTotal(next);
+          // animate numeric increment
+          animateNumber(document.getElementById('totalSaved'), prev, next, 500);
+
+          // record this run in history (localStorage)
+          const entry = {
+            ts: new Date().toISOString(),
+            original_tokens: Number(data.original_tokens) || 0,
+            compressed_tokens: Number(data.compressed_tokens) || 0,
+            tokens_saved: Number(data.tokens_saved) || 0,
+            compressed_prompt: data.compressed_prompt || ''
+          };
+          addHistoryEntry(entry);
+
+        wireRefClicks();
+      }
+
+      function animateNumber(el, from, to, duration){
+        const start = performance.now();
+        const diff = to - from;
+        function step(ts){
+          const t = Math.min(1, (ts - start) / duration);
+          const eased = t < 0.5 ? 2*t*t : -1 + (4 - 2*t)*t; // easeInOut-ish
+          const val = Math.round(from + diff * eased);
+          el.textContent = val.toLocaleString();
+          if(t < 1) requestAnimationFrame(step);
+          else { el.classList.add('pulse'); setTimeout(()=>el.classList.remove('pulse'),420) }
+        }
+        requestAnimationFrame(step);
+      }
+
+      // History helpers (localStorage)
+      const HISTORY_KEY = 'pc_history';
+      function readHistory(){
+        try{ return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]') }catch(e){ return [] }
+      }
+      function writeHistory(arr){ localStorage.setItem(HISTORY_KEY, JSON.stringify(arr.slice(0,200))) }
+      function renderHistory(){
+        const list = document.getElementById('historyList');
+        const arr = readHistory();
+        list.innerHTML = '';
+        if(!arr || arr.length===0){ list.innerHTML = '<div style="padding:8px;">No history yet. Run a compression to record history.</div>'; return }
+        // recent first
+        for(const e of arr.slice().reverse()){
+          const row = document.createElement('div');
+          row.style.padding = '8px'; row.style.borderBottom = '1px dashed rgba(255,255,255,0.02)'; row.style.cursor='pointer';
+          row.title = (new Date(e.ts)).toLocaleString();
+          row.innerHTML = `<div style="display:flex;justify-content:space-between;gap:12px"><div style="font-size:13px">${new Date(e.ts).toLocaleString()}</div><div style="font-weight:700;color:var(--accent-2)">+${e.tokens_saved}</div></div><div style="margin-top:6px;font-size:13px;color:var(--muted)">Orig ${e.original_tokens} → Comp ${e.compressed_tokens}</div>`;
+          row.onclick = ()=>{
+            // show compressed prompt in the result area and scroll into view
+            document.getElementById('result').innerText = e.compressed_prompt;
+            document.getElementById('origTokens').textContent = e.original_tokens;
+            document.getElementById('compTokens').textContent = e.compressed_tokens;
+            document.getElementById('savedTokens').textContent = e.tokens_saved;
+            // small pulse
+            const el = document.getElementById('result'); el.classList.add('pulse'); setTimeout(()=>el.classList.remove('pulse'),420);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          };
+          list.appendChild(row);
+        }
+      }
+
+      function addHistoryEntry(entry){
+        const arr = readHistory();
+        arr.push(entry);
+        // keep last 200 entries to avoid unlimited growth
+        writeHistory(arr.slice(-200));
+        renderHistory();
+      }
+
+      document.getElementById('clearHistory').onclick = ()=>{
+        if(!confirm('Clear local history of compress runs?')) return;
+        writeHistory([]);
+        renderHistory();
+      }
+
+      // render existing history on load
+      renderHistory();
+
+      document.getElementById('expandAll').onclick = ()=>{
+        // Click each ref to open (if already open it will toggle, so only open closed ones)
+        document.querySelectorAll('.ref').forEach(r=>{
+          const next = r.nextElementSibling;
+          if(!(next && next.classList && next.classList.contains('ref-value'))){ r.click(); }
+          else if(next && next.classList && next.classList.contains('hide')){ r.click(); }
+        });
+      }
+      document.getElementById('collapseAll').onclick = ()=>{
+        // Animate hide then remove nodes
+        document.querySelectorAll('.ref-value').forEach(v=>{
+          v.classList.remove('show'); v.classList.add('hide');
+          setTimeout(()=>{ try{ v.remove() }catch(_){} }, 240);
+        });
+      }
+
+      document.getElementById('copyBtn').onclick = ()=>{
+        const text = document.getElementById('result').innerText;
+        navigator.clipboard.writeText(text).then(()=>{
+          const old = document.getElementById('copyBtn').textContent;
+          document.getElementById('copyBtn').textContent = 'Copied';
+          setTimeout(()=> document.getElementById('copyBtn').textContent = old,1200);
+        })
+      }
+
+      document.getElementById('resetTotal').onclick = ()=>{
+        if(!confirm('Reset your cumulative token-saved counter? This is stored locally in your browser.')) return;
+        writeTotal(0);
+        setTotalDom(0);
+      }
+    </script>
+  </body>
+</html>
