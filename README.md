@@ -6,18 +6,18 @@
 
 Every day, users and companies run into a frustrating problem: running out of credits for their favorite AI agents and GPTs. Whether you’re building a product, automating tasks, or just exploring ideas, the cost of using large language models adds up fast. Most of that cost comes from the number of tokens you send—every word, every sentence, every bit of context.
 
-GreenTok was born out of a simple question: What if you could say more with less? By compressing prompts before they reach the AI, we help users stretch their credits further, save money, and keep their projects running smoothly. It’s not just about technical optimization—it’s about making AI more accessible and sustainable for everyone.
+C4Prompt was born out of a simple question: What if you could say more with less? By compressing prompts before they reach the AI, we help users stretch their credits further, save money, and keep their projects running smoothly. It’s not just about technical optimization—it’s about making AI more accessible and sustainable for everyone.
 
 ## The Story
 
 We noticed that most prompts sent to LLMs are filled with greetings, polite language, and extra words that don’t actually help the AI understand your request. These words cost you money, and over time, they can mean the difference between finishing a project or hitting a paywall.
 
-GreenTok automatically cleans up your prompts, focusing on what matters most. You get:
+C4Prompt automatically cleans up your prompts, focusing on what matters most. You get:
 - **More value for your credits:** By reducing input tokens, you can send more requests for the same price.
 - **Clarity and focus:** Your prompts become direct and efficient, without losing meaning.
 - **A positive side effect:** According to a recent [Google Gemini study](https://cloud.google.com/blog/products/infrastructure/measuring-the-environmental-impact-of-ai-inference/), reducing the use of LLMs also reduces carbon footprints globally. Every token you save not only helps your wallet, but also helps the planet.
 
-## What GreenTok Does
+## What C4Prompt Does
 
 - **Removes unnecessary fluff:** Greetings, polite phrases, and filler words are stripped out.
 - **Keeps your message clear:** Smart algorithms ensure the important information stays.
@@ -64,7 +64,7 @@ static/
 
 ## The Big Idea
 
-GreenTok isn’t just about saving tokens—it’s about making AI more responsible, affordable, and accessible. By compressing prompts, we help users get more value from AI, spend less, and do their part for the environment. It’s a small change with a big impact.
+C4Prompt isn’t just about saving tokens—it’s about making AI more responsible, affordable, and accessible. By compressing prompts, we help users get more value from AI, spend less, and do their part for the environment. It’s a small change with a big impact.
 
 ---
 
@@ -72,7 +72,7 @@ For questions or feedback, reach out to the team!
 
 ## What We Did
 
-We built a system that automatically shortens and optimizes user prompts for AI models. Instead of sending long, wordy requests, GreenTok cleans up the language and focuses on what matters most. Here’s how:
+We built a system that automatically shortens and optimizes user prompts for AI models. Instead of sending long, wordy requests, C4Prompt cleans up the language and focuses on what matters most. Here’s how:
 
 - **Removed unnecessary fluff:** We identified and stripped out greetings, polite phrases, and filler words that don’t add value to the prompt. This makes every request more direct and efficient.
 - **Focused on meaning:** Our process keeps the core message intact. We use smart algorithms to make sure the important information stays, so the AI still understands what you want.
@@ -119,7 +119,7 @@ static/
 
 ## The Big Idea
 
-GreenTok isn’t just about saving tokens—it’s about making AI more responsible and accessible. By compressing prompts, we help users get more value from AI, spend less, and do their part for the environment. It’s a small change with a big impact.
+C4Prompt isn’t just about saving tokens—it’s about making AI more responsible and accessible. By compressing prompts, we help users get more value from AI, spend less, and do their part for the environment. It’s a small change with a big impact.
 
 ---
 
