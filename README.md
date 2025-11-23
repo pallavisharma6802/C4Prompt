@@ -1,49 +1,51 @@
-# Carbon-Aware Conversations — CAPO (prototype)
+# GreenTok
 
-CAPO is a small toolkit that trims unnecessary words from prompts before they go to an LLM. The goal is simple: send fewer tokens, use less compute, and reduce emissions — without changing how people work.
+Compress LLM prompts to reduce tokens and CO2 emissions.
 
-What this repo contains
+## Overview
 
-- A tiny CLI prototype that runs two steps on a prompt: a rule-based cleaner (remove polite scaffolding and filler) and an extractive summarizer (pick the most important sentences).
-- A configurable `fillers.json` so you can control which phrases to strip.
-- A lightweight CO2 estimate that converts saved tokens → Wh → grams CO2e for quick, local reporting.
+GreenTok removes unnecessary words from prompts before sending them to language models. It uses rule-based filtering and extractive summarization to achieve 30-70% compression while preserving meaning.
 
-Why this matters
-
-Large models charge compute per token. Shortening prompts by even a modest percentage saves energy across many requests. CAPO shows you a practical way to reduce waste without changing models or user workflows.
-
-Quick results (example)
-
-- Prototype runs have reduced input size by roughly 30–60% on many longer prompts.
-- This is a prototype — real savings depend on traffic, prompt style, and infra.
-
-How it works (high level)
-
-1. Rule-based stripping: remove polite phrases and filler using configurable regexes.
-2. Extractive summarization: pick the most representative 1–2 sentences from the cleaned prompt using a small sentence-transformer model.
-
-Try the prototype
-
-1. Create a Python virtual environment and install dependencies:
+## Setup
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
+
+# Optional: Add API key for real-time carbon intensity
+export ELECTRICITY_MAPS_API_KEY='your-key'
 ```
 
-2. Run the CLI and paste or pipe a prompt:
+## Usage
 
 ```bash
+cd backend
 python main.py
-# or
-printf 'Your prompt here\n' | python main.py
 ```
 
-3. Edit `fillers.json` to tune the rule-based step.
+## How It Works
 
-Notes and next steps
+1. **Rule-based compression** - Removes greetings, hedging, politeness markers, and fillers
+2. **Extractive summarization** - Keeps semantically important sentences using embeddings
+3. **Semantic validation** - Ensures compressed output preserves meaning (>0.75 similarity)
+4. **Energy tracking** - Calculates net CO2 savings using real-time grid data
 
-- This repo is a starting point: improvements include better compression models, semantic-safety checks to keep important facts, and a batch evaluation harness.
+## Configuration
+
+Edit `backend/config/fillers.json` to customize patterns.
+
+## Structure
+
+```
+backend/
+├── main.py
+├── config/fillers.json
+├── core/
+│   ├── rule_based.py
+│   ├── extractive.py
+│   └── validator.py
+└── utils/co2_estimator.py
+```
 
 
