@@ -33,7 +33,7 @@ C4Prompt automatically cleans up your prompts, focusing on what matters most. Yo
 ## How It Works (In Simple Terms)
 
 1. **Clean up the prompt:** Remove greetings, politeness, and filler words.
-2. **Compress intelligently:** Use statistical methods to keep only the most important words and ideas.
+2. **Compress intelligently:** Use linguistic rules to identify and keep important words (directive verbs, proper nouns, key concepts) while removing articles and weak modifiers.
 3. **Check for clarity:** Make sure the new prompt still means the same thing.
 4. **Show your savings:** Display how much you saved in cost, compute, and CO₂.
 
@@ -88,7 +88,7 @@ We built a system that automatically shortens and optimizes user prompts for AI 
 ## How It Works 
 
 1. **Clean up the prompt:** Remove greetings, politeness, and filler words.
-2. **Compress intelligently:** Use statistical methods to keep only the most important words and ideas.
+2. **Compress intelligently:** Use linguistic rules to identify and keep important words (directive verbs, proper nouns, key concepts) while removing articles and weak modifiers.
 3. **Check for clarity:** Make sure the new prompt still means the same thing.
 4. **Show your savings:** Display how much you saved in cost, compute, and CO₂.
 
